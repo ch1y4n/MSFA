@@ -1,0 +1,149 @@
+rules:
+  - id: "gemma-boundary-special"
+    name: "Gemma boundary special tokens"
+    tokens:
+      - "<pad>"
+      - "<eos>"
+      - "<bos>"
+      - "<unk>"
+      - "<mask>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<(?:pad|eos|bos|unk|mask)>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+/?(?:pad|eos|bos|unk|mask)>'
+
+  - id: "gemma-turn-channel-special"
+    name: "Gemma turn and channel special tokens"
+    tokens:
+      - "<|turn>"
+      - "<turn|>"
+      - "<|channel>"
+      - "<channel|>"
+      - "<|think|>"
+      - "<|\"|>"
+      - "<start_of_turn>"
+      - "<end_of_turn>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:turn|channel|think|")>'
+          - '<\|(?:think|")\|>'
+          - '<(?:turn|channel)\|>'
+          - '<(?:start_of_turn|end_of_turn)>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:turn|channel|think|")\\+\|?>'
+          - '<(?:turn|channel)\\+\|>'
+          - '<\\+/?(?:start_of_turn|end_of_turn)>'
+          - '<\\+\|[^\n]{0,160}(?:turn|channel|think)[^\n]{0,160}>'
+
+  - id: "gemma-tool-special"
+    name: "Gemma tool special tokens"
+    tokens:
+      - "<|tool>"
+      - "<tool|>"
+      - "<|tool_call>"
+      - "<tool_call|>"
+      - "<|tool_response>"
+      - "<tool_response|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:tool|tool_call|tool_response)>'
+          - '<(?:tool|tool_call|tool_response)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:tool|tool_call|tool_response)>'
+          - '<(?:tool|tool_call|tool_response)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:tool_call|tool_response)[^\n]{0,160}>'
+
+  - id: "gemma-multimodal-special"
+    name: "Gemma multimodal special tokens"
+    tokens:
+      - "<|image>"
+      - "<image|>"
+      - "<|image|>"
+      - "<start_of_image>"
+      - "<end_of_image>"
+      - "<image_soft_token>"
+      - "<|audio>"
+      - "<audio|>"
+      - "<|audio|>"
+      - "<|video|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:image|audio|video)\|?>'
+          - '<(?:image|audio)\|>'
+          - '<(?:start_of_image|end_of_image|image_soft_token)>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:image|audio|video)\\+\|?>'
+          - '<(?:image|audio)\\+\|>'
+          - '<\\+/?(?:start_of_image|end_of_image|image_soft_token)>'
+          - '<\\+\|[^\n]{0,160}(?:image|audio|video)[^\n]{0,160}\\+\|?>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:start_of_image|end_of_image|image_soft_token)\b'
+
+  - id: "gemma-added-control-markers"
+    name: "Gemma added control markers"
+    description: "Tokenizer added tokens with special=false, still useful as control-marker evidence."
+    tokens:
+      - "[multimodal]"
+    match_type: contains
+    severity: medium
+    static_patterns:
+      literal:
+        strength: medium
+        match_type: regex
+        patterns:
+          - '\[multimodal\]'
+      regex:
+        strength: medium
+        match_type: regex
+        patterns:
+          - '\\+\[multimodal\\+\]'
+
+settings:
+  static_scan:
+    match_kinds:
+      - literal
+      - regex
+      - partial
+    dedupe:
+      same_rule_same_line: true
+      priority:
+        - regex
+        - literal
+        - partial
+    capture_context_lines: 5

@@ -1,0 +1,164 @@
+rules:
+  - id: "mistral-system-prompt"
+    name: "Mistral system prompt markers"
+    tokens:
+      - "[SYSTEM_PROMPT]"
+      - "[/SYSTEM_PROMPT]"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\[/?SYSTEM_PROMPT\]'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\\+\[(?:\\*/\??)?SYSTEM_PROMPT\\+\]'
+
+  - id: "mistral-tool"
+    name: "Mistral tool call markers"
+    tokens:
+      - "[AVAILABLE_TOOLS]"
+      - "[/AVAILABLE_TOOLS]"
+      - "[TOOL_CALLS]"
+      - "[TOOL_RESULTS]"
+      - "[/TOOL_RESULTS]"
+      - "[ARGS]"
+      - "[CALL_ID]"
+      - "[TOOL_CONTENT]"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\[/?(?:AVAILABLE_TOOLS|TOOL_RESULTS)\]'
+          - '\[(?:TOOL_CALLS|ARGS|CALL_ID|TOOL_CONTENT)\]'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\\+\[(?:\\*/\??)?(?:AVAILABLE_TOOLS|TOOL_RESULTS)\\+\]'
+          - '\\+\[(?:TOOL_CALLS|ARGS|CALL_ID|TOOL_CONTENT)\\+\]'
+          - '\\+\[[^\n]{0,160}(?:AVAILABLE_TOOLS|TOOL_CALLS|TOOL_RESULTS|TOOL_CONTENT)[^\n]{0,160}\\+\]'
+
+  - id: "mistral-thinking"
+    name: "Mistral thinking/reasoning markers"
+    tokens:
+      - "[THINK]"
+      - "[/THINK]"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: medium
+        match_type: regex
+        patterns:
+          - '\[/?THINK\]'
+      regex:
+        strength: medium
+        match_type: regex
+        patterns:
+          - '\\+\[(?:\\*/\??)?THINK\\+\]'
+
+  - id: "mistral-fim"
+    name: "Mistral fill-in-the-middle markers"
+    tokens:
+      - "[PREFIX]"
+      - "[MIDDLE]"
+      - "[SUFFIX]"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\[(?:PREFIX|MIDDLE|SUFFIX)\]'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\\+\[(?:PREFIX|MIDDLE|SUFFIX)\\+\]'
+
+  - id: "mistral-multimodal"
+    name: "Mistral multimodal media markers"
+    tokens:
+      - "[IMG]"
+      - "[IMG_BREAK]"
+      - "[IMG_END]"
+      - "[AUDIO]"
+      - "[BEGIN_AUDIO]"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\[(?:IMG|IMG_BREAK|IMG_END|AUDIO|BEGIN_AUDIO)\]'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\\+\[(?:IMG|IMG_BREAK|IMG_END|AUDIO|BEGIN_AUDIO)\\+\]'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:IMG_BREAK|IMG_END|BEGIN_AUDIO)\b'
+
+  - id: "mistral-model-settings"
+    name: "Mistral model settings markers"
+    tokens:
+      - "[MODEL_SETTINGS]"
+      - "[/MODEL_SETTINGS]"
+    match_type: contains
+    severity: medium
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\[/?MODEL_SETTINGS\]'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\\+\[(?:\\*/\??)?MODEL_SETTINGS\\+\]'
+
+  - id: "mistral-reference"
+    name: "Mistral reference document markers"
+    tokens:
+      - "\\[REFERENCE_DOC_(1[0-9]|[0-9])\\]"
+    match_type: regex
+    severity: medium
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\[REFERENCE_DOC_(?:1[0-9]|[0-9])\]'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\\+\[REFERENCE_DOC_[^\n]{0,80}\\+\]'
+
+settings:
+  static_scan:
+    match_kinds:
+      - literal
+      - regex
+      - partial
+    dedupe:
+      same_rule_same_line: true
+      priority:
+        - regex
+        - literal
+        - partial
+    capture_context_lines: 5

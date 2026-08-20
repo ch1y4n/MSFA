@@ -1,0 +1,250 @@
+rules:
+  - id: "universal-endoftext"
+    name: "Universal end-of-text markers"
+    source_families:
+      - universal
+      - qwen
+      - glm
+    universal_reason: "Shared end-of-text/end-of-prompt markers used across multiple tokenizer/chat-template families."
+    tokens:
+      - "<|endoftext|>"
+      - "<|endofprompt|>"
+    match_type: contains
+    severity: critical
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:endoftext|endofprompt)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:endoftext|endofprompt)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:endoftext|endofprompt)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:endoftext|endofprompt)\b'
+
+  - id: "universal-inst-markers"
+    name: "Universal instruction template markers"
+    source_families:
+      - llama
+      - mistral
+    universal_reason: "The [INST]/[/INST] template markers are shared by Llama-style and Mistral-style instruction formats."
+    tokens:
+      - "[INST]"
+      - "[/INST]"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\[/?INST\]'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '\\+\[(?:\\*/\??)?INST\\+\]'
+
+  - id: "universal-thinking-tags"
+    name: "Universal XML-style thinking tags"
+    source_families:
+      - qwen
+      - deepseek
+      - glm
+    universal_reason: "The <think>...</think> reasoning tags recur across Qwen, DeepSeek, and GLM-compatible model outputs."
+    tokens:
+      - "<think>"
+      - "</think>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: medium
+        match_type: regex
+        patterns:
+          - '</?think>'
+      regex:
+        strength: medium
+        match_type: regex
+        patterns:
+          - '<\\*/\?think>'
+
+  - id: "universal-xml-tool-tags"
+    name: "Universal XML-style tool boundary tags"
+    source_families:
+      - qwen
+      - deepseek
+      - glm
+    universal_reason: "XML-style tool_call/tool_response/tool_result boundaries appear in several tool-calling formats and distill variants."
+    tokens:
+      - "<tool_call>"
+      - "</tool_call>"
+      - "<tool_response>"
+      - "</tool_response>"
+      - "<tool_result>"
+      - "</tool_result>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '</?(?:tool_call|tool_response|tool_result)>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\*/\?(?:tool_call|tool_response|tool_result)>'
+
+  - id: "universal-fim-angle-pipe"
+    name: "Universal angle-pipe FIM and file markers"
+    source_families:
+      - qwen
+      - llama
+      - deepseek
+    universal_reason: "FIM and file/repo angle-pipe markers overlap between Qwen, Llama 4 FIM, and DeepSeek distill/Qwen-derived formats."
+    tokens:
+      - "<|fim_prefix|>"
+      - "<|fim_middle|>"
+      - "<|fim_suffix|>"
+      - "<|fim_pad|>"
+      - "<|repo_name|>"
+      - "<|file_sep|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:fim_prefix|fim_middle|fim_suffix|fim_pad|repo_name|file_sep)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:fim_prefix|fim_middle|fim_suffix|fim_pad|repo_name|file_sep)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:fim_prefix|fim_middle|fim_suffix|fim_pad|repo_name|file_sep)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:fim_prefix|fim_middle|fim_suffix|fim_pad|file_sep)\b'
+
+  - id: "universal-qwen-mm-angle-pipe"
+    name: "Universal Qwen-style multimodal angle-pipe markers"
+    source_families:
+      - qwen
+      - deepseek
+    universal_reason: "Qwen multimodal and grounding markers are also inherited by DeepSeek R1 Distill Qwen-style token sets."
+    tokens:
+      - "<|vision_start|>"
+      - "<|vision_end|>"
+      - "<|vision_pad|>"
+      - "<|image_pad|>"
+      - "<|video_pad|>"
+      - "<|quad_start|>"
+      - "<|quad_end|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:vision_start|vision_end|vision_pad|image_pad|video_pad|quad_start|quad_end)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:vision_start|vision_end|vision_pad|image_pad|video_pad|quad_start|quad_end)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:vision_start|vision_end|vision_pad|image_pad|video_pad|quad_start|quad_end)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:vision_start|vision_end|vision_pad|image_pad|video_pad|quad_start|quad_end)\b'
+
+  - id: "universal-llama-header-angle-pipe"
+    name: "Universal Llama-style header and turn angle-pipe markers"
+    source_families:
+      - llama
+      - deepseek
+    universal_reason: "Llama 3 chat/header markers are also inherited by DeepSeek R1 Distill Llama-style token sets."
+    tokens:
+      - "<|start_header_id|>"
+      - "<|end_header_id|>"
+      - "<|eom_id|>"
+      - "<|eot_id|>"
+      - "<|python_tag|>"
+      - "<|finetune_right_pad_id|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:start_header_id|end_header_id|eom_id|eot_id|python_tag|finetune_right_pad_id)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:start_header_id|end_header_id|eom_id|eot_id|python_tag|finetune_right_pad_id)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:start_header_id|end_header_id|eom_id|eot_id|python_tag|finetune_right_pad_id)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:start_header_id|end_header_id|eom_id|eot_id|python_tag|finetune_right_pad_id)\b'
+
+  - id: "universal-reserved-special-token"
+    name: "Universal reserved special token patterns"
+    source_families:
+      - llama
+      - deepseek
+    universal_reason: "Reserved special token numbering patterns recur in Llama/Llama-derived and DeepSeek distill token sets."
+    tokens:
+      - "<|reserved_special_token_N|>"
+      - "<|text_post_train_reserved_special_token_N|>"
+      - "<|vision_reserved_special_token_N|>"
+    match_type: regex
+    severity: medium
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:reserved_special_token|text_post_train_reserved_special_token|vision_reserved_special_token)_\d+\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:reserved_special_token|text_post_train_reserved_special_token|vision_reserved_special_token)_\\+d\+?\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:reserved_special_token|text_post_train_reserved_special_token|vision_reserved_special_token)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:reserved_special_token|text_post_train_reserved_special_token|vision_reserved_special_token)\b'
+
+settings:
+  static_scan:
+    match_kinds:
+      - literal
+      - regex
+      - partial
+    dedupe:
+      same_rule_same_line: true
+      priority:
+        - regex
+        - literal
+        - partial
+    capture_context_lines: 5

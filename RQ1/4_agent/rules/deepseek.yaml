@@ -1,0 +1,320 @@
+rules:
+  - id: "deepseek-boundary-special"
+    name: "DeepSeek boundary special tokens"
+    tokens:
+      - "<｜begin▁of▁sentence｜>"
+      - "<｜end▁of▁sentence｜>"
+      - "<|EOT|>"
+      - "<｜▁pad▁｜>"
+      - "<pad>"
+      - "｜DSML｜"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?:begin▁of▁sentence|end▁of▁sentence|▁pad▁)｜>'
+          - '<\|EOT\|>'
+          - '<pad>'
+          - '｜DSML｜'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|EOT\\+\|>'
+          - '<｜(?=[^\n]{0,160}(?:\(\?:|\||\?|\*|\+|\[))[^\n]{0,160}(?:begin▁of▁sentence|end▁of▁sentence|▁pad▁)[^\n]{0,160}｜>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - 'begin▁of▁sentence'
+          - 'end▁of▁sentence'
+
+  - id: "deepseek-chat-markers"
+    name: "DeepSeek chat control markers"
+    tokens:
+      - "<｜User｜>"
+      - "<｜Assistant｜>"
+      - "<|User|>"
+      - "<|Assistant|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?:User|Assistant)｜>'
+          - '<\|(?:User|Assistant)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:User|Assistant)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:User|Assistant)[^\n]{0,160}\\+\|>'
+          - '<｜(?=[^\n]{0,160}(?:\(\?:|\||\?|\*|\+|\[))[^\n]{0,160}(?:User|Assistant)[^\n]{0,160}｜>'
+
+  - id: "deepseek-fim-markers"
+    name: "DeepSeek FIM control markers"
+    tokens:
+      - "<｜fim▁begin｜>"
+      - "<｜fim▁hole｜>"
+      - "<｜fim▁end｜>"
+      - "<｜completion｜>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?:fim▁begin|fim▁hole|fim▁end|completion)｜>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?=[^\n]{0,160}(?:\(\?:|\||\?|\*|\+|\[))[^\n]{0,160}(?:fim▁begin|fim▁hole|fim▁end|completion)[^\n]{0,160}｜>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - 'fim▁(?:begin|hole|end)'
+
+  - id: "deepseek-tool-markers"
+    name: "DeepSeek tool control markers"
+    tokens:
+      - "<｜tool▁calls▁begin｜>"
+      - "<｜tool▁call▁begin｜>"
+      - "<｜tool▁sep｜>"
+      - "<｜tool▁call▁end｜>"
+      - "<｜tool▁calls▁end｜>"
+      - "<｜tool▁outputs▁begin｜>"
+      - "<｜tool▁output▁begin｜>"
+      - "<｜tool▁output▁end｜>"
+      - "<｜tool▁outputs▁end｜>"
+      - "<｜DSML｜function_calls>"
+      - "</｜DSML｜function_calls>"
+      - "<｜DSML｜tool_calls>"
+      - "</｜DSML｜tool_calls>"
+      - "<｜DSML｜invoke"
+      - "</｜DSML｜invoke>"
+      - "<｜DSML｜parameter"
+      - "</｜DSML｜parameter>"
+      - "<function_results>"
+      - "</function_results>"
+      - "<result>"
+      - "</result>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?:tool▁calls▁begin|tool▁call▁begin|tool▁sep|tool▁call▁end|tool▁calls▁end|tool▁outputs▁begin|tool▁output▁begin|tool▁output▁end|tool▁outputs▁end)｜>'
+          - '</?｜DSML｜(?:function_calls|tool_calls|invoke|parameter)\b[^>]*>'
+          - '</?(?:function_results|result)>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?=[^\n]{0,160}(?:\(\?:|\||\?|\*|\+|\[))[^\n]{0,160}(?:tool▁calls▁begin|tool▁call▁begin|tool▁sep|tool▁call▁end|tool▁calls▁end|tool▁outputs▁begin|tool▁output▁begin|tool▁output▁end|tool▁outputs▁end)[^\n]{0,160}｜>'
+          - '<\\*/\?(?:function_results|result)>'
+          - '</\\?｜DSML｜[^\n]{0,160}(?:function_calls|tool_calls|invoke|parameter)[^\n]{0,160}>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - 'tool▁(?:calls▁begin|call▁begin|sep|call▁end|calls▁end|outputs▁begin|output▁begin|output▁end|outputs▁end)'
+
+  - id: "deepseek-placeholder-special"
+    name: "DeepSeek placeholder reserved special tokens"
+    tokens:
+      - "<｜place▁holder▁no▁\\d+｜>"
+    match_type: regex
+    severity: medium
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜place▁holder▁no▁\d+｜>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜place▁holder▁no▁\\+d\+?｜>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - 'place▁holder▁no'
+
+  - id: "deepseek-v4-mm-placeholder-special"
+    name: "DeepSeek V4 multimodal placeholder special tokens"
+    tokens:
+      - "<\\|place_holder_mm_span_\\d{4}\\|>"
+    match_type: regex
+    severity: medium
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|place_holder_mm_span_\d{4}\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|[^\n]{0,160}place_holder_mm_span[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\bplace_holder_mm_span\b'
+
+  - id: "deepseek-v4-vision-special"
+    name: "DeepSeek V4 vision and grounding special tokens"
+    tokens:
+      - "<｜image｜>"
+      - "<｜image2｜>"
+      - "<｜rl_image_start｜>"
+      - "<｜rl_image_pad｜>"
+      - "<｜ref｜>"
+      - "<｜/ref｜>"
+      - "<｜box｜>"
+      - "<｜/box｜>"
+      - "<｜point｜>"
+      - "<｜/point｜>"
+      - "<｜polygon｜>"
+      - "<｜/polygon｜>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜/?(?:image|image2|rl_image_start|rl_image_pad|ref|box|point|polygon)｜>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?=[^\n]{0,160}(?:\(\?:|\||\?|\*|\+|\[))[^\n]{0,160}(?:image2|rl_image_start|rl_image_pad|ref|box|point|polygon)[^\n]{0,160}｜>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:rl_image_start|rl_image_pad)\b'
+
+  - id: "deepseek-v4-quick-task-markers"
+    name: "DeepSeek V4 quick instruction control markers"
+    tokens:
+      - "<｜latest_reminder｜>"
+      - "<｜action｜>"
+      - "<｜query｜>"
+      - "<｜authority｜>"
+      - "<｜domain｜>"
+      - "<｜title｜>"
+      - "<｜read_url｜>"
+      - "<｜extracted_url｜>"
+      - "<｜end_of_query｜>"
+      - "<｜begin▁sys｜>"
+      - "<｜end▁sys｜>"
+      - "<｜task｜>"
+      - "<｜answer｜>"
+      - "<｜entity｜>"
+      - "<｜political｜>"
+      - "<｜safety｜>"
+      - "<｜search｜>"
+      - "<｜search▁begin｜>"
+      - "<｜search▁end｜>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?:latest_reminder|action|query|authority|domain|title|read_url|extracted_url|end_of_query|begin▁sys|end▁sys|task|answer|entity|political|safety|search|search▁begin|search▁end)｜>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?=[^\n]{0,160}(?:\(\?:|\||\?|\*|\+|\[))[^\n]{0,160}(?:latest_reminder|read_url|extracted_url|end_of_query|begin▁sys|end▁sys|search▁begin|search▁end)[^\n]{0,160}｜>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '(?:begin▁sys|end▁sys|search▁begin|search▁end)'
+
+  - id: "deepseek-v4-file-table-markers"
+    name: "DeepSeek V4 file and table control markers"
+    tokens:
+      - "<｜begin▁of▁repo▁name｜>"
+      - "<｜end▁of▁repo▁name｜>"
+      - "<｜begin▁of▁file▁name｜>"
+      - "<｜end▁of▁file▁name｜>"
+      - "<｜begin▁of▁file｜>"
+      - "<｜end▁of▁file｜>"
+      - "<｜place▁holder▁for▁copy｜>"
+      - "<｜place▁holder▁for▁pointer▁replace｜>"
+      - "<｜table｜>"
+      - "<｜/table>｜"
+      - "<｜tr｜>"
+      - "<｜/tr｜>"
+      - "<｜td｜>"
+      - "<｜/td｜>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜/?(?:begin▁of▁repo▁name|end▁of▁repo▁name|begin▁of▁file▁name|end▁of▁file▁name|begin▁of▁file|end▁of▁file|place▁holder▁for▁copy|place▁holder▁for▁pointer▁replace|table|tr|td)>?｜>'
+          - '<｜/table>｜'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<｜(?=[^\n]{0,160}(?:\(\?:|\||\?|\*|\+|\[))[^\n]{0,160}(?:begin▁of▁repo▁name|end▁of▁repo▁name|begin▁of▁file▁name|end▁of▁file▁name|begin▁of▁file|end▁of▁file|place▁holder▁for▁copy|place▁holder▁for▁pointer▁replace)[^\n]{0,160}｜>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '(?:begin▁of▁repo▁name|end▁of▁repo▁name|begin▁of▁file▁name|end▁of▁file▁name|begin▁of▁file|end▁of▁file|place▁holder▁for▁copy|place▁holder▁for▁pointer▁replace)'
+
+  - id: "deepseek-dsml-markup"
+    name: "DeepSeek DSML markup"
+    tokens:
+      - "</?｜DSML｜(?:function_calls|tool_calls|invoke|parameter)\\b[^>]*>"
+    match_type: regex
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '</?｜DSML｜(?:function_calls|tool_calls|invoke|parameter)\b[^>]*>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '</\\?｜DSML｜[^\n]{0,160}(?:function_calls|tool_calls|invoke|parameter)[^\n]{0,160}>'
+
+settings:
+  static_scan:
+    match_kinds:
+      - literal
+      - regex
+      - partial
+    dedupe:
+      same_rule_same_line: true
+      priority:
+        - regex
+        - literal
+        - partial
+    capture_context_lines: 5

@@ -1,0 +1,74 @@
+rules:
+  - id: "qwen-special-core"
+    name: "Qwen core special tokens"
+    tokens:
+      - "<|im_start|>"
+      - "<|im_end|>"
+      - "<|object_ref_start|>"
+      - "<|object_ref_end|>"
+      - "<|box_start|>"
+      - "<|box_end|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:im_start|im_end|object_ref_start|object_ref_end|box_start|box_end)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:im_start|im_end|object_ref_start|object_ref_end|box_start|box_end)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:im_start|im_end|object_ref_start|object_ref_end|box_start|box_end)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:im_start|im_end|object_ref_start|object_ref_end|box_start|box_end)\b'
+
+  - id: "qwen-audio-special"
+    name: "Qwen audio and TTS special tokens"
+    tokens:
+      - "<|audio_start|>"
+      - "<|audio_end|>"
+      - "<tts_pad>"
+      - "<tts_text_bos>"
+      - "<tts_text_eod>"
+      - "<tts_text_bos_single>"
+      - "<|audio_pad|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:audio_start|audio_end|audio_pad)\|>'
+          - '<(?:tts_pad|tts_text_bos|tts_text_eod|tts_text_bos_single)>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:audio_start|audio_end|audio_pad)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:audio_start|audio_end|audio_pad)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:audio_start|audio_end|audio_pad|tts_pad|tts_text_bos|tts_text_eod|tts_text_bos_single)\b'
+
+settings:
+  static_scan:
+    match_kinds:
+      - literal
+      - regex
+      - partial
+    dedupe:
+      same_rule_same_line: true
+      priority:
+        - regex
+        - literal
+        - partial
+    capture_context_lines: 5

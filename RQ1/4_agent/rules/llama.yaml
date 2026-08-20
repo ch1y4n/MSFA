@@ -1,0 +1,156 @@
+rules:
+  - id: "llama-boundary-special"
+    name: "Llama boundary special tokens"
+    tokens:
+      - "<s>"
+      - "</s>"
+      - "<unk>"
+      - "<|begin_of_text|>"
+      - "<|end_of_text|>"
+      - "<|finetune_right_pad|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '</?s>'
+          - '<unk>'
+          - '<\|(?:begin_of_text|end_of_text|finetune_right_pad)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\*/\?s>'
+          - '<\\+\|(?:begin_of_text|end_of_text|finetune_right_pad)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:begin_of_text|end_of_text|finetune_right_pad)[^\n]{0,160}\\+\|>'
+
+  - id: "llama-sys"
+    name: "Llama SYS template markers"
+    tokens:
+      - "<<SYS>>"
+      - "<</SYS>>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<</?SYS>>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<{2}\\*/\?SYS>{2}'
+
+  - id: "llama-vision-special"
+    name: "Llama vision special tokens"
+    tokens:
+      - "<|image|>"
+      - "<|step_id|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:image|step_id)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:image|step_id)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:image|step_id)[^\n]{0,160}\\+\|>'
+
+  - id: "llama4-chat-special"
+    name: "Llama 4 chat special tokens"
+    tokens:
+      - "<|header_start|>"
+      - "<|header_end|>"
+      - "<|eom|>"
+      - "<|eot|>"
+      - "<|step|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:header_start|header_end|eom|eot|step)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:header_start|header_end|eom|eot|step)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:header_start|header_end|eom|eot|step)[^\n]{0,160}\\+\|>'
+
+  - id: "llama4-python-special"
+    name: "Llama 4 Python special tokens"
+    tokens:
+      - "<|python_start|>"
+      - "<|python_end|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:python_start|python_end)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:python_start|python_end)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:python_start|python_end)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:python_start|python_end)\b'
+
+  - id: "llama4-vision-special"
+    name: "Llama 4 vision special tokens"
+    tokens:
+      - "<|image_start|>"
+      - "<|image_end|>"
+      - "<|patch|>"
+      - "<|tile_x_separator|>"
+      - "<|tile_y_separator|>"
+    match_type: contains
+    severity: high
+    static_patterns:
+      literal:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\|(?:image_start|image_end|patch|tile_x_separator|tile_y_separator)\|>'
+      regex:
+        strength: strong
+        match_type: regex
+        patterns:
+          - '<\\+\|(?:image_start|image_end|patch|tile_x_separator|tile_y_separator)\\+\|>'
+          - '<\\+\|[^\n]{0,160}(?:image_start|image_end|patch|tile_x_separator|tile_y_separator)[^\n]{0,160}\\+\|>'
+      partial:
+        strength: weak
+        match_type: regex
+        patterns:
+          - '\b(?:image_start|image_end|tile_x_separator|tile_y_separator)\b'
+
+settings:
+  static_scan:
+    match_kinds:
+      - literal
+      - regex
+      - partial
+    dedupe:
+      same_rule_same_line: true
+      priority:
+        - regex
+        - literal
+        - partial
+    capture_context_lines: 5
